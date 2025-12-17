@@ -108,7 +108,15 @@ class Context:
         """
 
         url_parts = parse.urlsplit(self.src_metadata.home_page)
+        netloc = url_parts.netloc
+        if isinstance(netloc, bytes):
+            netloc = netloc.decode('utf-8')
+
+        path = url_parts.path
+        if isinstance(path, bytes):
+            path = path.decode('utf-8')
+
         return '.'.join((
-            '.'.join(reversed(url_parts.netloc.split('.'))),
-            '.'.join(filter(None, url_parts.path.split('/')))
+            '.'.join(reversed(netloc.split('.'))),
+            '.'.join(filter(None, path.split('/')))
         ))

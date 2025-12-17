@@ -10,6 +10,7 @@ import shutil
 import uuid
 import xml.etree.ElementTree as et
 import zipfile
+import importlib.metadata
 
 import cookiecutter
 from cookiecutter import generate
@@ -46,6 +47,14 @@ class Step:
         )
 
     def __call__(self, ctx, dsp):
+        # Restore metadata to be used in MSI name assembly
+        if not ctx.src_metadata.version or str(ctx.src_metadata.version) == "None":
+            import importlib.metadata
+            try:
+                # Get version from the metadata of an installed package
+                ctx.src_metadata.version = importlib.metadata.version("mu-editor")
+            except:
+                ctx.src_metadata.version = "0.0.0" # if no version, Set default version
 
         build_dir = dsp.directories()['build']
 
@@ -230,6 +239,14 @@ class Step:
         # MSI versions are not as flexible as PEP 440's.
         # Let's adapt the version to three dot-separated numbers.
 
+        print(f"DEBUG: version value is {version} (type: {type(version)})")
+        if not version or version == "None":
+            try:
+                version = importlib.metadata.version("mu-editor")
+                print(f"DEBUG: detected version from environment: {version}")
+            except importlib.metadata.PackageNotFoundError:
+                version = "0.0.0"  # If no version, Set default version  
+
         result = self._VERSION_RE.match(version)
         pep440_release = result.group('release')
 
@@ -258,8 +275,17 @@ class Step:
 
 
     def _upgrade_code_guid(self, ctx):
+        home_page = ctx.src_metadata.home_page
+        if not home_page or home_page == "None":
+            try:
+                # Get a URL from the metadata of an installed package
+                meta = importlib.metadata.metadata("mu-editor")
+                home_page = meta.get("Home-page") or meta.get("Project-URL")
+            except Exception:
+                # If URL in setup.py is not recognized, set it to the default
+                home_page = "https://github.com/mu-editor/mu"
 
-        return str(uuid.uuid5(uuid.NAMESPACE_URL, ctx.src_metadata.home_page))
+        return str(uuid.uuid5(uuid.NAMESPACE_URL, str(home_page)))
 
 
     def _create_wix_manifest(self, ctx, dsp, wix_root, manifest_path):
