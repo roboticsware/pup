@@ -89,6 +89,22 @@
 
         <UI>
             <UIRef Id="WixUI_Minimal" />
+
+            <Dialog Id="UpgradeConfirmDlg" Width="280" Height="95" Title="[ProductName] Setup">
+                <Control Id="No" Type="PushButton" X="150" Y="65" Width="56" Height="17" Default="yes" Cancel="yes" Text="!(loc.WixUINo)">
+                    <Publish Event="EndDialog" Value="Exit">1</Publish>
+                </Control>
+                <Control Id="Yes" Type="PushButton" X="85" Y="65" Width="56" Height="17" Text="!(loc.WixUIYes)">
+                    <Publish Event="EndDialog" Value="Return">1</Publish>
+                </Control>
+                <Control Id="Text" Type="Text" X="48" Y="15" Width="215" Height="42" NoPrefix="yes" Text="An older version of [ProductName] is already installed. Do you want to remove it and continue?" />
+                <Control Id="Icon" Type="Icon" X="15" Y="15" Width="24" Height="24" FixedSize="yes" IconSize="32" Text="!(loc.CancelDlgIcon)" />
+            </Dialog>
+
+            <InstallUISequence>
+                <Show Dialog="UpgradeConfirmDlg" Before="WelcomeEulaDlg">OLDERVERSIONBEINGUPGRADED</Show>
+            </InstallUISequence>
+
             <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">
                 WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
             </Publish>
