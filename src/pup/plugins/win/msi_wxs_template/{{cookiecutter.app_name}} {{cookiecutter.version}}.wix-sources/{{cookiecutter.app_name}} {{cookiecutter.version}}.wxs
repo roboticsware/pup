@@ -76,8 +76,15 @@
             </Directory>
         </Directory>
 
+        <CustomAction Id="CleanOldVenvs"
+                      Directory="TARGETDIR"
+                      ExeCommand='cmd.exe /c "for /d %d in ("%LOCALAPPDATA%\python\mu\mu_venv-*") do @rd /s /q "%d""'
+                      Execute="deferred"
+                      Return="ignore" />
+
         <InstallExecuteSequence>
-            <RemoveExistingProducts After="InstallValidate"/>
+            <RemoveExistingProducts After="InstallInitialize"/>
+            <Custom Action="CleanOldVenvs" After="RemoveExistingProducts">OLDERVERSIONBEINGUPGRADED</Custom>
         </InstallExecuteSequence>
 
         <Feature Id="DefaultFeature" Level="1">
