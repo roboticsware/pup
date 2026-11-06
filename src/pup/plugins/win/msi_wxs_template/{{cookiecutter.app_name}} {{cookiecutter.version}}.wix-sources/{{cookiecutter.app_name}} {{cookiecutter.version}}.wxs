@@ -42,7 +42,7 @@
                     Minimum="0.0.0"
                     Maximum="$(var.ProductVersion)"
                     IncludeMinimum="yes"
-                    IncludeMaximum="no"
+                    IncludeMaximum="yes"
                     Property="OLDERVERSIONBEINGUPGRADED"
             />
         </Upgrade>
