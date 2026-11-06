@@ -75,6 +75,13 @@ class Step:
 
         wheel_file = self._create_wheel(ctx.src, build_dir, dsp)
         ctx.src_wheel = wheel_file
+
+        import pkginfo.distribution
+        latest_header_attrs = pkginfo.distribution.HEADER_ATTRS.get('2.2', ())
+        for v in ('2.3', '2.4', '2.5'):
+            if v not in pkginfo.distribution.HEADER_ATTRS:
+                pkginfo.distribution.HEADER_ATTRS[v] = latest_header_attrs
+
         ctx.src_metadata = pkginfo.Wheel(wheel_file)
 
         for field in self._METADATA_FIELDS:
