@@ -51,10 +51,18 @@ class Step:
         if not ctx.src_metadata.version or str(ctx.src_metadata.version) == "None":
             import importlib.metadata
             try:
-                # Get version from the metadata of an installed package
                 ctx.src_metadata.version = importlib.metadata.version("mu-editor")
             except:
-                ctx.src_metadata.version = "0.0.0" # if no version, Set default version
+                ctx.src_metadata.version = "0.0.0"
+
+        if not getattr(ctx.src_metadata, "author", None) or str(ctx.src_metadata.author) == "None":
+            import importlib.metadata
+            try:
+                ctx.src_metadata.author = importlib.metadata.metadata("mu-editor").get("Author")
+            except:
+                pass
+            if not ctx.src_metadata.author or str(ctx.src_metadata.author) == "None":
+                ctx.src_metadata.author = "Nicholas H.Tollervey & RoboticsWare" 
 
         build_dir = dsp.directories()['build']
 
@@ -99,17 +107,19 @@ class Step:
         banner_path, dialog_path = self._create_ui_bitmaps(ctx.icon_path, build_dir)
         rtf_license_path = self._create_rtf_from_text(ctx.license_path, build_dir)
 
+        import xml.sax.saxutils
+
         tmpl_path = ilr.files(msi_wxs_template)
         tmpl_data = {
             'cookiecutter': {
-                'app_name': ctx.nice_name,
+                'app_name': xml.sax.saxutils.escape(str(ctx.nice_name)),
                 'version': ctx.src_metadata.version,
                 'msi_version': self._msi_version(ctx.src_metadata.version),
                 'icon_path': ctx.icon_path,
                 'ui_banner_path': banner_path,
                 'ui_dialog_path': dialog_path,
                 'rtf_license_path': rtf_license_path,
-                'author': ctx.src_metadata.author,
+                'author': xml.sax.saxutils.escape(str(ctx.src_metadata.author)),
                 'author_email': ctx.src_metadata.author_email,
                 'url': ctx.src_metadata.home_page,
                 'launch_module': self._launch_module_from_context(ctx),
